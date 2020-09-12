@@ -14,7 +14,8 @@ $ python parse.py
 $ python open.py
 ```
 예시로 3개 데이터 볼 수 있게 해놨습니다
-
+    - `lyric`: 가사 부분이고 향후 웹서비스를 위해 가사 화면에 표시하기 좋게 슬래시로 끊어서 저장해둠. 전처리 당연히 짤라내고 분석 돌릴 예정
+    - `type`: 학습을 위해 종속변수로서 사랑, 새벽감성, 슬픔, 즐거움 네가지 범주로 저장해둠
 ```python
 [{'album': {'id': 10286982,
             'img': 'https://cdnimg.melon.co.kr/cm/album/images/102/86/982/10286982_500.jpg?2f04262baf6d2231dea855c32cc46ade/melon/quality/80/optimize',

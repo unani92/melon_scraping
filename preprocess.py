@@ -15,18 +15,18 @@ summer_df = pd.read_json('summer.json')
 print(f'joy: {summer_df.shape[0]}')
 love_df = pd.read_json('love.json')
 print(f'love: {love_df.shape[0]}')
-midnight_df = pd.read_json('midnight.json')
-print(f'midnight: {midnight_df.shape[0]}')
+# midnight_df = pd.read_json('midnight.json')
+# print(f'midnight: {midnight_df.shape[0]}')
 sad_df = pd.read_json('sad.json')
 print(f'sad: {sad_df.shape[0]}')
 
-df_all = pd.concat([summer_df, love_df, midnight_df, sad_df])
+df_all = pd.concat([summer_df, love_df, sad_df]) # midnight 빼고 돌림..
 
 # 가사 비어있는 로우 제거, 가사에서 각종 특수문자 제거
 df_havs_lyric = df_all[df_all['lyric'] != ''][['lyric', 'type']]
 df_havs_lyric['lyric'] = df_havs_lyric['lyric'].apply(lambda x: re.sub('[^0-9a-zA-Zㄱ-힗]', ' ', x))
 
-# mecab
+# mecab(품사 단위로 짤라서 토큰 만드는데는 이게 제일 빠름)
 filter_pos = ['NNG', 'NNP', 'NNB', 'NR', 'NP', 'VV', 'VA', 'VX', 'AX', 'VCP', 'VCN', 'MM', 'MAG', 'MAJ']
 pos_tagger = Mecab()
 
@@ -39,6 +39,7 @@ def morphs(text):
 df_havs_lyric['lyric'] = df_havs_lyric['lyric'].apply(morphs)
 df_havs_lyric = df_havs_lyric[df_havs_lyric['lyric'] != '']
 
+# okt 모듈 활용한 전처리
 # result = re.sub('[^0-9a-zA-Zㄱ-힗]', '', myStr)
 # for song in summer_data:
 #     if song['lyric'] != '':
@@ -60,8 +61,9 @@ df_havs_lyric = df_havs_lyric[df_havs_lyric['lyric'] != '']
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB # 다항분포 나이브 베이즈 모델
-from sklearn.metrics import accuracy_score #정확도 계산
+from sklearn.metrics import accuracy_score, classification_report  # 정확도 계산
 from sklearn.model_selection import train_test_split
+
 
 train, test = train_test_split(df_havs_lyric, test_size=0.2)
 print(test.head(20))
@@ -79,5 +81,6 @@ tfidfv_test = tdidf_transformer.transform(X_test_dtm) #DTM을 TF-IDF 행렬로 �
 
 predicted = mod.predict(tfidfv_test) #테스트 데이터에 대한 예측
 print("정확도:", accuracy_score(test.type, predicted)) #예측값과 실제값 비교
-print(predicted)
+# print(predicted)
+print(classification_report(test.type, predicted))
 # print(mod.predict_proba(tfidfv_test))

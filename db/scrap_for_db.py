@@ -68,7 +68,7 @@ def scrap_song(bs_object, header=None):
 
         song_dict = {
             'model': 'music.song',
-            'id': songId,
+            'pk': songId,
             'fields': {
                 'name': song_name,
                 'img': album_img,
@@ -144,7 +144,7 @@ def scrap_artist(artists, header=None):
 
         artist_dic = {
             'model': 'music.artist',
-            'id': artist_id,
+            'pk': artist_id,
             'fields': {
                 'name': artist_name,
                 'img': img,
@@ -184,7 +184,7 @@ def scrap_album(albums, header=None):
             artist = entry.find('div', class_='artist').find('a')['href']
             artist = int(re.findall('\d+', artist)[0])
         except:
-            artist = 'various artists'
+            artist = 1
 
         dl = entry.find('dl', class_='list')
         album_info_dd = dl.select('dd')
@@ -209,8 +209,8 @@ def scrap_album(albums, header=None):
         like = int(like_res['contsLike'][0]["SUMMCNT"])
 
         album_dic = {
-            'model': 'music.artist',
-            'id': album,
+            'model': 'music.album',
+            'pk': album,
             'fields': {
                 'img': img,
                 'name': name,

@@ -60,6 +60,11 @@ for song in songs:
     for g in genre_name:
         genres.add(g)
 
+for album in albums:
+    genre_name = album['fields']['genre']
+    for g in genre_name:
+        genres.add(g)
+
 genre_lst = []
 for idx, genre in enumerate(genres):
     genre_lst.append({

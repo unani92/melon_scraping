@@ -74,7 +74,7 @@ def scrap_song(bs_object, header=None):
                 'img': album_img,
                 'artist': artist,
                 'released': released,
-                'genre': genre,
+                'genres': genre,
                 'album': album,
                 'lyric': lyric,
                 'like': like,

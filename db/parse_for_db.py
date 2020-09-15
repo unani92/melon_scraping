@@ -56,12 +56,12 @@ album_file.write(json.dumps(albums))
 
 genres = set()
 for song in songs:
-    genre_name = song['fields']['genre']
+    genre_name = song['fields']['genres']
     for g in genre_name:
         genres.add(g)
 
 for album in albums:
-    genre_name = album['fields']['genre']
+    genre_name = album['fields']['genres']
     for g in genre_name:
         genres.add(g)
 

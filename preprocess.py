@@ -81,6 +81,6 @@ tfidfv_test = tdidf_transformer.transform(X_test_dtm) #DTM을 TF-IDF 행렬로 �
 
 predicted = mod.predict(tfidfv_test) #테스트 데이터에 대한 예측
 print("정확도:", accuracy_score(test.type, predicted)) #예측값과 실제값 비교
-# print(predicted)
+print(predicted)
 print(classification_report(test.type, predicted))
-# print(mod.predict_proba(tfidfv_test))
+print(mod.predict_proba(tfidfv_test))

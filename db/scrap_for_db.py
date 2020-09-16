@@ -91,70 +91,75 @@ def scrap_artist(artists, header=None):
         header = headers
 
     artist_lst = []
-    for artist in artists:
-        artist_html = requests.get(f'https://www.melon.com/artist/detail.htm?artistId={artist}', headers=header).text
-        artist_bs = BeautifulSoup(artist_html, "html.parser")
-        artist_div = artist_bs.find('div', class_='dtl_atist clfix')
-
-        # artist id
-        artist_id = artist
-        # artist img, name
+    for idx, artist in enumerate(artists):
         try:
-            img = artist_div.find(id='artistImgArea').find('img')['src']
-        except:
-            img = ''
-        try:
-            artist_name = artist_div.find('p', class_='title_atist').text[5:]
-            artist_name = artist_name.split('\xa0')[0]
-            artist_name = re.sub(r'\([^)]*\)', '', artist_name)
-            if artist_name[-1] == '':
-                artist_name = artist_name[-1]
-        except:
-            artist_name = ''
-        # artist_debue
-        artist_info_dd = artist_div.find('dl', class_='atist_info clfix').select('dd')
-        artist_info_dt = artist_div.find('dl', class_='atist_info clfix').select('dt')
+            artist_html = requests.get(f'https://www.melon.com/artist/detail.htm?artistId={artist}', headers=header).text
+            artist_bs = BeautifulSoup(artist_html, "html.parser")
+            artist_div = artist_bs.find('div', class_='dtl_atist clfix')
 
-        artist_info = dict()
-        for i in range(len(artist_info_dd)):
-            artist_info[artist_info_dt[i].text] = artist_info_dd[i].text
+            # artist id
+            artist_id = artist
+            # artist img, name
+            try:
+                img = artist_div.find(id='artistImgArea').find('img')['src']
+            except:
+                img = ''
+            try:
+                artist_name = artist_div.find('p', class_='title_atist').text[5:]
+                artist_name = artist_name.split('\xa0')[0]
+                artist_name = re.sub(r'\([^)]*\)', '', artist_name)
+                if artist_name[-1] == '':
+                    artist_name = artist_name[-1]
+            except:
+                artist_name = ''
+            # artist_debue
+            artist_info_dd = artist_div.find('dl', class_='atist_info clfix').select('dd')
+            artist_info_dt = artist_div.find('dl', class_='atist_info clfix').select('dt')
 
-        try:
-            artist_debue = artist_info['데뷔']
-            artist_debue = artist_debue.split('\n')[1]
+            artist_info = dict()
+            for i in range(len(artist_info_dd)):
+                artist_info[artist_info_dt[i].text] = artist_info_dd[i].text
 
-            # artist_debue = re.findall("\d+",artist_debue)
-            # artist_debue = ''.join(artist_debue)
-        except:
-            artist_debue = ''
-            # artist_type
-        try:
-            artist_type = artist_info['활동유형']
-        except:
-            artist_type = '솔로'
-        if artist_type == '그룹':
-            members_div = artist_div.find('div', class_='wrap_atistname')
-            members_a = members_div.select('a')
-            members = ''
-            for member in members_a:
-                members += member['title'] + ' '
-            members = members[:-1]
-        else:
-            members = ''
+            try:
+                artist_debue = artist_info['데뷔']
+                artist_debue = artist_debue.split('\n')[1]
 
-        artist_dic = {
-            'model': 'music.artist',
-            'pk': artist_id,
-            'fields': {
-                'name': artist_name,
-                'img': img,
-                'debue': artist_debue,
-                'type': artist_type,
-                'member': members
+                # artist_debue = re.findall("\d+",artist_debue)
+                # artist_debue = ''.join(artist_debue)
+            except:
+                artist_debue = ''
+                # artist_type
+            try:
+                artist_type = artist_info['활동유형']
+            except:
+                artist_type = '솔로'
+            if artist_type == '그룹':
+                members_div = artist_div.find('div', class_='wrap_atistname')
+                members_a = members_div.select('a')
+                members = ''
+                for member in members_a:
+                    members += member['title'] + ' '
+                members = members[:-1]
+            else:
+                members = ''
+
+            artist_dic = {
+                'model': 'music.artist',
+                'pk': artist_id,
+                'fields': {
+                    'name': artist_name,
+                    'img': img,
+                    'debue': artist_debue,
+                    'type': artist_type,
+                    'member': members
+                }
             }
-        }
 
-        artist_lst.append(artist_dic)
+            artist_lst.append(artist_dic)
+
+        except:
+            print(f'아티스트 {idx-1}/{len(artists)}까지 돌아가다 멈춤!!!')
+            return artist_lst
 
     return artist_lst
 
@@ -163,63 +168,66 @@ def scrap_album(albums, header=None):
         header = headers
 
     album_lst = []
-    for album in albums:
-
-        album_html = requests.get(f'https://www.melon.com/album/detail.htm?albumId={album}', headers=header).text
-        album_bs = BeautifulSoup(album_html, "html.parser")
-
-        album_div = album_bs.find('div', class_='wrap_info')
-
-        # img
-        img = album_div.find('img')['src']
-
-        entry = album_div.find('div', class_='entry')
-
-        # name
-        name = entry.find('div', class_='song_name').text
-        name = re.sub(r"\s+", " ", name)[5:-1]
-
-        # artist
+    for idx, album in enumerate(albums):
         try:
-            artist = entry.find('div', class_='artist').find('a')['href']
-            artist = int(re.findall('\d+', artist)[0])
-        except:
-            artist = 1
+            album_html = requests.get(f'https://www.melon.com/album/detail.htm?albumId={album}', headers=header).text
+            album_bs = BeautifulSoup(album_html, "html.parser")
 
-        dl = entry.find('dl', class_='list')
-        album_info_dd = dl.select('dd')
-        album_info_dt = dl.select('dt')
+            album_div = album_bs.find('div', class_='wrap_info')
 
-        album_info = dict()
-        for i in range(len(album_info_dd)):
-            album_info[album_info_dt[i].text] = album_info_dd[i].text
+            # img
+            img = album_div.find('img')['src']
 
-        # released_date
-        released_date = album_info['발매일']
-        released_date = ''.join(re.findall('\d+', released_date))
+            entry = album_div.find('div', class_='entry')
 
-        # genre
-        genres = album_info['장르'].split(', ')
+            # name
+            name = entry.find('div', class_='song_name').text
+            name = re.sub(r"\s+", " ", name)[5:-1]
 
-        # like
-        like_res = requests.get(
-            f'https://www.melon.com/commonlike/getAlbumLike.json?contsIds={int(album)}',
-            headers=header
-        ).json()
-        like = int(like_res['contsLike'][0]["SUMMCNT"])
+            # artist
+            try:
+                artist = entry.find('div', class_='artist').find('a')['href']
+                artist = int(re.findall('\d+', artist)[0])
+            except:
+                artist = 1
 
-        album_dic = {
-            'model': 'music.album',
-            'pk': album,
-            'fields': {
-                'img': img,
-                'name': name,
-                'artist': artist,
-                'released_date': released_date,
-                'genres': genres,
-                'like': like
+            dl = entry.find('dl', class_='list')
+            album_info_dd = dl.select('dd')
+            album_info_dt = dl.select('dt')
+
+            album_info = dict()
+            for i in range(len(album_info_dd)):
+                album_info[album_info_dt[i].text] = album_info_dd[i].text
+
+            # released_date
+            released_date = album_info['발매일']
+            released_date = ''.join(re.findall('\d+', released_date))
+
+            # genre
+            genres = album_info['장르'].split(', ')
+
+            # like
+            like_res = requests.get(
+                f'https://www.melon.com/commonlike/getAlbumLike.json?contsIds={int(album)}',
+                headers=header
+            ).json()
+            like = int(like_res['contsLike'][0]["SUMMCNT"])
+
+            album_dic = {
+                'model': 'music.album',
+                'pk': album,
+                'fields': {
+                    'img': img,
+                    'name': name,
+                    'artist': artist,
+                    'released_date': released_date,
+                    'genres': genres,
+                    'like': like
+                }
             }
-        }
-        album_lst.append(album_dic)
+            album_lst.append(album_dic)
+        except:
+            print(f'앨범 {idx-1}/{len(albums)}까지 하다 멈춤')
+            return
 
     return album_lst

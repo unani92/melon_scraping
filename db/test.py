@@ -9,14 +9,7 @@
 
 import json
 from pprint import pprint
+from db.scrap_for_db import scrap_album
 
-with open('song.json') as song_file:
-    songs = json.load(song_file)
-
-artists = set()
-for song in songs:
-    musicians = song['fields']['artist']
-    for m in musicians:
-        artists.add(m)
-artists = list(artists)
-print(len(artists))
+a = scrap_album([342967])
+pprint(a)

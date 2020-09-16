@@ -156,6 +156,8 @@ def scrap_artist(artists, header=None):
             }
 
             artist_lst.append(artist_dic)
+            if not idx % 50 :
+                print(f'{idx} / {len(artists)} fin')
 
         except:
             print(f'아티스트 {idx-1}/{len(artists)}까지 돌아가다 멈춤!!!')
@@ -173,8 +175,24 @@ def scrap_album(albums, header=None):
             album_html = requests.get(f'https://www.melon.com/album/detail.htm?albumId={album}', headers=header).text
             album_bs = BeautifulSoup(album_html, "html.parser")
 
-            album_div = album_bs.find('div', class_='wrap_info')
+            # album 수록곡 전부 긁어오기
+            tr_all = album_bs.find('tbody').select('tr')
+            tr_filter = []
+            for tr in tr_all:
+                try:
+                    if tr['class'][0] == 'cd':
+                        continue
+                    else : tr_filter.append(tr)
+                except KeyError:
+                    tr_filter.append(tr)
 
+            songs = ''
+            for tr in tr_filter:
+                t = tr.find('span')
+                songs += tr.find('div', class_='ellipsis').find('a').text + ','
+            songs = songs[:-1]
+
+            album_div = album_bs.find('div', class_='wrap_info')
             # img
             img = album_div.find('img')['src']
 
@@ -222,7 +240,8 @@ def scrap_album(albums, header=None):
                     'artist': artist,
                     'released_date': released_date,
                     'genres': genres,
-                    'like': like
+                    'like': like,
+                    'songs': songs
                 }
             }
             album_lst.append(album_dic)

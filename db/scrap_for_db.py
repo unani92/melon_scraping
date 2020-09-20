@@ -134,12 +134,15 @@ def scrap_artist(artists, header=None):
             except:
                 artist_type = '솔로'
             if artist_type == '그룹':
-                members_div = artist_div.find('div', class_='wrap_atistname')
-                members_a = members_div.select('a')
-                members = ''
-                for member in members_a:
-                    members += member['title'] + ' '
-                members = members[:-1]
+                try:
+                    members_div = artist_div.find('div', class_='wrap_atistname')
+                    members_a = members_div.select('a')
+                    members = ''
+                    for member in members_a:
+                        members += member['title'] + ' '
+                    members = members[:-1]
+                except:
+                    members = ''
             else:
                 members = ''
 
@@ -188,8 +191,10 @@ def scrap_album(albums, header=None):
 
             songs = ''
             for tr in tr_filter:
-                t = tr.find('span')
-                songs += tr.find('div', class_='ellipsis').find('a').text + ','
+                try:
+                    songs += tr.find('div', class_='ellipsis').find('a').text + ','
+                except:
+                    continue
             songs = songs[:-1]
 
             album_div = album_bs.find('div', class_='wrap_info')
@@ -204,8 +209,11 @@ def scrap_album(albums, header=None):
 
             # artist
             try:
-                artist = entry.find('div', class_='artist').find('a')['href']
-                artist = int(re.findall('\d+', artist)[0])
+                artist = entry.find('div', class_='artist').select('a')
+                temp = []
+                for a in artist:
+                    temp.append(int(re.findall('\d+', a['href'])[0]))
+                artist = temp
             except:
                 artist = 1
 
@@ -245,8 +253,11 @@ def scrap_album(albums, header=None):
                 }
             }
             album_lst.append(album_dic)
+            if not idx % 50 :
+                print(f'{idx} / {len(albums)} fin')
+
         except:
             print(f'앨범 {idx-1}/{len(albums)}까지 하다 멈춤')
-            return
+            return album_lst
 
     return album_lst

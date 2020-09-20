@@ -46,31 +46,48 @@ with open('./db/song.json') as song_file:
 # song_file = open("./db/song.json", "w+")
 # song_file.write(json.dumps(songs))
 
+with open('./db/artist.json') as a:
+    a = json.load(a)
+
 # 스크래핑된 음악의 가수 스크래핑
-# artists_lst = artists()
-#
-# various_artist = {
-#             'model': 'music.artist',
-#             'pk': 1,
-#             'fields': {
-#                 'name': 'various artist',
-#                 'img': '',
-#                 'debue': '',
-#                 'type': '',
-#                 'member': 'members'
-#             }
-#         }
-#
-# artists_dicts = scrap_artist(artists_lst) + [various_artist]
-# artist_file = open('./db/artist.json',"w+")
-# artist_file.write(json.dumps(artists_dicts))
+artists_lst = artists()[:428]
+
+various_artist = {
+            'model': 'music.artist',
+            'pk': 1,
+            'fields': {
+                'name': 'various artist',
+                'img': '',
+                'debue': '',
+                'type': '',
+                'member': 'members'
+            }
+        }
+
+artists_dicts = scrap_artist(artists_lst) + [various_artist]
+a += artists_dicts
+artist_file = open('./db/artist.json',"w+")
+artist_file.write(json.dumps(a))
 
 # 스크래핑된 음악의 앨범 스크래핑
-albums_lst = albums()
 
-albums = scrap_album(albums_lst)
-album_file = open('./db/album.json', 'w+')
-album_file.write(json.dumps(albums))
+# with open('./db/album.json') as a:
+#     a = json.load(a)
+
+# a = list({v['pk']:v for v in a}.values())
+# print(len(a))
+#
+# albums_lst = albums()[1056:]
+#
+# albums = scrap_album(albums_lst)
+#
+# a += albums
+# album_file = open('./db/album.json', 'w+')
+# album_file.write(json.dumps(a))
+
+#
+# with open('./db/album.json') as albums:
+#     albums = json.load(albums)
 #
 # genres = set()
 # for song in songs:
@@ -95,4 +112,4 @@ album_file.write(json.dumps(albums))
 #
 # genre_file = open('./db/genre.json', 'w+')
 # genre_file.write(json.dumps(genre_lst))
-
+#

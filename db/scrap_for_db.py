@@ -261,3 +261,89 @@ def scrap_album(albums, header=None):
             return album_lst
 
     return album_lst
+
+def scrap_album_song(song_nums, header=None):
+    if header is None:
+        header = headers
+    song_lst = []
+    for idx, song in enumerate(song_nums):
+
+        songId = song
+        song_res = requests.get(f'https://www.melon.com/song/detail.htm?songId={int(songId)}', headers=header).text
+        bs = BeautifulSoup(song_res, 'html.parser')
+
+        try:
+            section_info = bs.find('div', class_='section_info')
+            try:
+                album_img = section_info.find('img')['src']
+            except:
+                album_img = ''
+
+            song_name = section_info.find('div', class_='song_name')
+            song_name = re.sub(r"\s+", " ", song_name.text.rstrip())[4:]
+
+            # artist 2명 이상일수도 있음 조심
+            artist_all = section_info.findAll('a', class_='artist_name')
+            artist = []
+            for a in artist_all:
+                id = int(re.findall('\d+', a['href'])[0])
+                artist.append(id)
+
+            meta = section_info.select('.list dd')
+
+            try:
+                album_id = meta[0].find('a')['href']
+                album_id = int(re.findall("\d+", album_id)[0])
+            except:
+                album_id = ''
+
+            try:
+                released = meta[1].text
+            except:
+                released = ''
+
+            try:  # 아티스트 2명 이상인경우 끊어서 리스트에 담는다.
+                genres = meta[2].text
+                genre = list(genres.split(', '))
+            except:
+                genre = []
+
+            album = album_id
+            try:
+                lyric = bs.find('div', class_='lyric')
+                lyric = str(lyric)
+                lyric = re.sub('<.+?>', '/', lyric, 0, re.I|re.S)[11:-2]
+            except:
+                lyric = ''
+
+            like_res = requests.get(
+                f'https://www.melon.com/commonlike/getSongLike.json?contsIds={int(songId)}',
+                headers=header
+            ).json()
+            like = int(like_res['contsLike'][0]["SUMMCNT"])
+
+            song_dict = {
+                'model': 'music.song',
+                'pk': songId,
+                'fields': {
+                    'name': song_name,
+                    'img': album_img,
+                    'artist': artist,
+                    'released': released,
+                    'genres': genre,
+                    'album': album,
+                    'lyric': lyric,
+                    'like': like,
+                    'type': ''
+                }
+            }
+
+            song_lst.append(song_dict)
+            if not idx % 50 :
+                print(f'{1930 + idx} / {22819} fin')
+
+        except:
+            print(f'{1930 + idx-1}까지 하다 멈춤')
+            return song_lst
+
+    return song_lst
